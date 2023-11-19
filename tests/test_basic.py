@@ -18,6 +18,7 @@ from werkzeug.routing import BuildError
 from werkzeug.routing import RequestRedirect
 
 import flask
+import uuid
 
 require_cpython_gc = pytest.mark.skipif(
     python_implementation() != "CPython",
@@ -153,7 +154,7 @@ def test_disallow_string_for_allowed_methods(app):
 
 
 def test_url_mapping(app, client):
-    random_uuid4 = "7eb41166-9ebf-4d26-b771-ea3f54f8b383"
+    random_uuid4 = uuid.uuid4()
 
     def index():
         return flask.request.method

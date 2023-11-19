@@ -233,8 +233,8 @@ def test_session_dynamic_cookie_name():
         def get_cookie_name(self, app):
             if flask.request.url.endswith("dynamic_cookie"):
                 return "dynamic_cookie_name"
-            else:
-                return super().get_cookie_name(app)
+            
+            return super().get_cookie_name(app)
 
     class CustomFlask(flask.Flask):
         session_interface = PathAwareSessionInterface()

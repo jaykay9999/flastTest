@@ -81,8 +81,6 @@ def stream_with_context(
                 yield request.args['name']
                 yield '!'
             return Response(stream_with_context(generate()))
-
-    .. versionadded:: 0.9
     """
     try:
         gen = iter(generator_or_function)  # type: ignore
@@ -204,19 +202,6 @@ def url_for(
     :param values: Values to use for the variable parts of the URL rule.
         Unknown keys are appended as query string arguments, like
         ``?a=b&c=d``.
-
-    .. versionchanged:: 2.2
-        Calls ``current_app.url_for``, allowing an app to override the
-        behavior.
-
-    .. versionchanged:: 0.10
-       The ``_scheme`` parameter was added.
-
-    .. versionchanged:: 0.9
-       The ``_anchor`` and ``_method`` parameters were added.
-
-    .. versionchanged:: 0.9
-       Calls ``app.handle_url_build_error`` on build errors.
     """
     return current_app.url_for(
         endpoint,
@@ -241,10 +226,6 @@ def redirect(
     :param code: The status code for the redirect.
     :param Response: The response class to use. Not used when
         ``current_app`` is active, which uses ``app.response_class``.
-
-    .. versionadded:: 2.2
-        Calls ``current_app.redirect`` if available instead of always
-        using Werkzeug's default ``redirect``.
     """
     if current_app:
         return current_app.redirect(location, code=code)
@@ -264,10 +245,6 @@ def abort(code: int | BaseResponse, *args: t.Any, **kwargs: t.Any) -> t.NoReturn
         registered in ``app.aborter``.
     :param args: Passed to the exception.
     :param kwargs: Passed to the exception.
-
-    .. versionadded:: 2.2
-        Calls ``current_app.aborter`` if available instead of always
-        using Werkzeug's default ``abort``.
     """
     if current_app:
         current_app.aborter(code, *args, **kwargs)
@@ -289,8 +266,6 @@ def get_template_attribute(template_name: str, attribute: str) -> t.Any:
         hello = get_template_attribute('_cider.html', 'hello')
         return hello('World')
 
-    .. versionadded:: 0.2
-
     :param template_name: the name of the template
     :param attribute: the name of the variable of macro to access
     """
@@ -302,8 +277,6 @@ def flash(message: str, category: str = "message") -> None:
     flashed message from the session and to display it to the user,
     the template has to call :func:`get_flashed_messages`.
 
-    .. versionchanged:: 0.3
-       `category` parameter added.
 
     :param message: the message to be flashed.
     :param category: the category for the message.  The following values
@@ -351,16 +324,6 @@ def get_flashed_messages(
       provided categories.
 
     See :doc:`/patterns/flashing` for examples.
-
-    .. versionchanged:: 0.3
-       `with_categories` parameter added.
-
-    .. versionchanged:: 0.9
-        `category_filter` parameter added.
-
-    :param with_categories: set to ``True`` to also receive categories.
-    :param category_filter: filter of categories to limit return values.  Only
-                            categories in the list will be returned.
     """
     flashes = request_ctx.flashes
     if flashes is None:
@@ -398,22 +361,12 @@ def send_file(
 ) -> Response:
     """Send the contents of a file to the client.
 
-    The first argument can be a file path or a file-like object. Paths
-    are preferred in most cases because Werkzeug can manage the file and
-    get extra information from the path. Passing a file-like object
-    requires that the file is opened in binary mode, and is mostly
-    useful when building a file in memory with :class:`io.BytesIO`.
+    The first argument can be a file path (preferred)
 
-    Never pass file paths provided by a user. The path is assumed to be
-    trusted, so a user could craft a path to access a file you didn't
-    intend. Use :func:`send_from_directory` to safely serve
+    Never pass file paths provided by a user. 
+    Use :func:`send_from_directory` to safely serve
     user-requested paths from within a directory.
 
-    If the WSGI server sets a ``file_wrapper`` in ``environ``, it is
-    used, otherwise Werkzeug's built-in wrapper is used. Alternatively,
-    if the HTTP server supports ``X-Sendfile``, configuring Flask with
-    ``USE_X_SENDFILE = True`` will tell the server to send the given
-    path, which is much more efficient than reading it in Python.
 
     :param path_or_file: The path to the file to send, relative to the
         current working directory if a relative path is given.
@@ -435,67 +388,6 @@ def send_file(
     :param max_age: How long the client should cache the file, in
         seconds. If set, ``Cache-Control`` will be ``public``, otherwise
         it will be ``no-cache`` to prefer conditional caching.
-
-    .. versionchanged:: 2.0
-        ``download_name`` replaces the ``attachment_filename``
-        parameter. If ``as_attachment=False``, it is passed with
-        ``Content-Disposition: inline`` instead.
-
-    .. versionchanged:: 2.0
-        ``max_age`` replaces the ``cache_timeout`` parameter.
-        ``conditional`` is enabled and ``max_age`` is not set by
-        default.
-
-    .. versionchanged:: 2.0
-        ``etag`` replaces the ``add_etags`` parameter. It can be a
-        string to use instead of generating one.
-
-    .. versionchanged:: 2.0
-        Passing a file-like object that inherits from
-        :class:`~io.TextIOBase` will raise a :exc:`ValueError` rather
-        than sending an empty file.
-
-    .. versionadded:: 2.0
-        Moved the implementation to Werkzeug. This is now a wrapper to
-        pass some Flask-specific arguments.
-
-    .. versionchanged:: 1.1
-        ``filename`` may be a :class:`~os.PathLike` object.
-
-    .. versionchanged:: 1.1
-        Passing a :class:`~io.BytesIO` object supports range requests.
-
-    .. versionchanged:: 1.0.3
-        Filenames are encoded with ASCII instead of Latin-1 for broader
-        compatibility with WSGI servers.
-
-    .. versionchanged:: 1.0
-        UTF-8 filenames as specified in :rfc:`2231` are supported.
-
-    .. versionchanged:: 0.12
-        The filename is no longer automatically inferred from file
-        objects. If you want to use automatic MIME and etag support,
-        pass a filename via ``filename_or_fp`` or
-        ``attachment_filename``.
-
-    .. versionchanged:: 0.12
-        ``attachment_filename`` is preferred over ``filename`` for MIME
-        detection.
-
-    .. versionchanged:: 0.9
-        ``cache_timeout`` defaults to
-        :meth:`Flask.get_send_file_max_age`.
-
-    .. versionchanged:: 0.7
-        MIME guessing and etag support for file-like objects was
-        removed because it was unreliable. Pass a filename if you are
-        able to, otherwise attach an etag yourself.
-
-    .. versionchanged:: 0.5
-        The ``add_etags``, ``cache_timeout`` and ``conditional``
-        parameters were added. The default behavior is to add etags.
-
-    .. versionadded:: 0.2
     """
     return werkzeug.utils.send_file(  # type: ignore[return-value]
         **_prepare_send_file_kwargs(
@@ -540,15 +432,6 @@ def send_from_directory(
     :param path: The path to the file to send, relative to
         ``directory``.
     :param kwargs: Arguments to pass to :func:`send_file`.
-
-    .. versionchanged:: 2.0
-        ``path`` replaces the ``filename`` parameter.
-
-    .. versionadded:: 2.0
-        Moved the implementation to Werkzeug. This is now a wrapper to
-        pass some Flask-specific arguments.
-
-    .. versionadded:: 0.5
     """
     return werkzeug.utils.send_from_directory(  # type: ignore[return-value]
         directory, path, **_prepare_send_file_kwargs(**kwargs)

@@ -4,6 +4,12 @@ import pytest
 
 import flask
 
+from config_module_app import app as config_module_app
+from config_package_app import app as config_package_app
+from namespace.package2 import app as namespace_package2_app
+from site_app import app as site_app
+from installed_package import app as installed_package_app
+import site_package as site_package
 
 def test_explicit_instance_paths(modules_tmp_path):
     with pytest.raises(ValueError, match=".*must be absolute"):
@@ -22,9 +28,8 @@ def test_uninstalled_module_paths(modules_tmp_path, purge_module):
     )
     purge_module("config_module_app")
 
-    from config_module_app import app
 
-    assert app.instance_path == os.fspath(modules_tmp_path / "instance")
+    assert config_module_app.instance_path == os.fspath(modules_tmp_path / "instance")
 
 
 def test_uninstalled_package_paths(modules_tmp_path, purge_module):
@@ -38,9 +43,8 @@ def test_uninstalled_package_paths(modules_tmp_path, purge_module):
     )
     purge_module("config_package_app")
 
-    from config_package_app import app
 
-    assert app.instance_path == os.fspath(modules_tmp_path / "instance")
+    assert config_package_app.instance_path == os.fspath(modules_tmp_path / "instance")
 
 
 def test_uninstalled_namespace_paths(tmp_path, monkeypatch, purge_module):
@@ -57,9 +61,9 @@ def test_uninstalled_namespace_paths(tmp_path, monkeypatch, purge_module):
     purge_module("namespace.package2")
     purge_module("namespace")
 
-    from namespace.package2 import app
 
-    assert app.instance_path == os.fspath(project2 / "instance")
+
+    assert namespace_package2_app.instance_path == os.fspath(project2 / "instance")
 
 
 def test_installed_module_paths(
@@ -70,9 +74,9 @@ def test_installed_module_paths(
     )
     purge_module("site_app")
 
-    from site_app import app
 
-    assert app.instance_path == os.fspath(
+
+    assert site_app.instance_path == os.fspath(
         modules_tmp_path / "var" / "site_app-instance"
     )
 
@@ -89,9 +93,8 @@ def test_installed_package_paths(
     (app / "__init__.py").write_text("import flask\napp = flask.Flask(__name__)\n")
     purge_module("installed_package")
 
-    from installed_package import app
 
-    assert app.instance_path == os.fspath(
+    assert installed_package_app.instance_path == os.fspath(
         modules_tmp_path / "var" / "installed_package-instance"
     )
 
@@ -103,8 +106,6 @@ def test_prefix_package_paths(
     app.mkdir()
     (app / "__init__.py").write_text("import flask\napp = flask.Flask(__name__)\n")
     purge_module("site_package")
-
-    import site_package
 
     assert site_package.app.instance_path == os.fspath(
         modules_tmp_path / "var" / "site_package-instance"

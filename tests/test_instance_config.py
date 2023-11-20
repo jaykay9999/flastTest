@@ -95,6 +95,41 @@ def test_installed_package_paths(
         modules_tmp_path / "var" / "installed_package-instance"
     )
 
+# you have to mention the test type
+def test_installed_paths(
+    test_type, modules_tmp_path,  purge_module, monkeypatch, site_packages
+):
+    if test_type == "module":
+
+        (site_packages / "site_app.py").write_text(
+            "import flask\napp = flask.Flask(__name__)\n"
+        )
+        purge_module("site_app")
+
+        from site_app import app
+
+        assert app.instance_path == os.fspath(
+            modules_tmp_path / "var" / "site_app-instance"
+        )
+
+    elif test_type == "package":
+
+        installed_path = modules_tmp_path / "path"
+        installed_path.mkdir()
+        monkeypatch.syspath_prepend(installed_path)
+
+        app = installed_path / "installed_package"
+        app.mkdir()
+        (app / "__init__.py").write_text("import flask\napp = flask.Flask(__name__)\n")
+        purge_module("installed_package")
+
+        from installed_package import app
+
+        assert app.instance_path == os.fspath(
+            modules_tmp_path / "var" / "installed_package-instance"
+        )
+
+
 
 def test_prefix_package_paths(
     limit_loader, modules_tmp_path, modules_tmp_path_prefix, purge_module, site_packages

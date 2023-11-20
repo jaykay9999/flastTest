@@ -141,15 +141,15 @@ def explain_template_loading_attempts(app: App, template, attempts) -> None:
             total_found += 1
         info.append(f"       -> {detail}")
 
-    seems_fishy = False
+    template_number_issue = False
     if total_found == 0:
         info.append("Error: the template could not be found.")
-        seems_fishy = True
+        template_number_issue = True
     elif total_found > 1:
         info.append("Warning: multiple loaders returned a match for the template.")
-        seems_fishy = True
+        template_number_issue = True
 
-    if blueprint is not None and seems_fishy:
+    if blueprint is not None and template_number_issue:
         info.append(
             "  The template was looked up from an endpoint that belongs"
             f" to the blueprint {blueprint!r}."

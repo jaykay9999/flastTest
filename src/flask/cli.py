@@ -201,12 +201,9 @@ def prepare_import(path):
     module_name = []
 
     # move up until outside package structure (no __init__.py)
-    while True:
+    while os.path.exists(os.path.join(path, "__init__.py")):
         path, name = os.path.split(path)
         module_name.append(name)
-
-        if not os.path.exists(os.path.join(path, "__init__.py")):
-            break
 
     if sys.path[0] != path:
         sys.path.insert(0, path)

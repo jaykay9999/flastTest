@@ -300,20 +300,18 @@ class ScriptInfo:
 
         if self.create_app is not None:
             app = self.create_app()
+        elif self.app_import_path:
+            path, name = (
+                re.split(r":(?![\\/])", self.app_import_path, maxsplit=1) + [None]
+            )[:2]
+            import_name = prepare_import(path)
+            app = locate_app(import_name, name)
         else:
-            if self.app_import_path:
-                path, name = (
-                    re.split(r":(?![\\/])", self.app_import_path, maxsplit=1) + [None]
-                )[:2]
+            for path in ("wsgi.py", "app.py"):
                 import_name = prepare_import(path)
-                app = locate_app(import_name, name)
-            else:
-                for path in ("wsgi.py", "app.py"):
-                    import_name = prepare_import(path)
-                    app = locate_app(import_name, None, raise_if_not_found=False)
-
-                    if app:
-                        break
+                app = locate_app(import_name, None, raise_if_not_found=False)
+                if app:
+                    break
 
         if not app:
             raise NoAppException(

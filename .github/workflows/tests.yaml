@@ -33,14 +33,14 @@ jobs:
           - {name: 'Development Versions', python: '3.8', os: ubuntu-latest, tox: py38-dev}
           - {name: Typing, python: '3.12', os: ubuntu-latest, tox: typing}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
-      - uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236
+      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+      - uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d
         with:
           python-version: ${{ matrix.python }}
           cache: 'pip'
           cache-dependency-path: requirements*/*.txt
       - name: cache mypy
-        uses: actions/cache@704facf57e6136b1bc63b828d79edcd491f0ee84
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: ./.mypy_cache
           key: mypy|${{ matrix.python }}|${{ hashFiles('pyproject.toml') }}
